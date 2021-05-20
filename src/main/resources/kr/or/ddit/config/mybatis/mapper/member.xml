@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="members">
+	<!-- select 된 컬럼과 resultType에 
+		기술된 클래스의 필드 이름이 동일하면 자동으로 값을 넣어준다.
+		resultType : 한 행의 정보를 저장할 수 있는 클래스 타입을 명시 
+	-->
+  <select id="selectAllUser" resultType="memberVo">
+    select * 
+    from users
+  </select>
+  
+	<select id="selectUser" resultType="memberVo" parameterType="String">
+    	select *
+    	from users
+    	where userid = #{value}
+  	</select>
+  	
+  	<select id="selectCheckUserId" resultType="int" parameterType="String">
+    	select COUNT(*)
+    	from users
+    	where userid = #{value}
+  	</select>
+  	
+  	<select id="selectCheckAlias" resultType="int" parameterType="String">
+    	select COUNT(*)
+    	from users
+    	where alias = #{value}
+  	</select>
+  	
+  	<!-- valueObject 혹은 Map 비유하자면 정규직 vs 프리맨서 -->
+	<select id="selectPagingUser" resultType="memberVo" 
+									parameterType="pageVo">
+	    SELECT *
+	    FROM
+	    (SELECT ROWNUM rn, a.*
+	    FROM
+		        (SELECT *
+		        FROM users
+		        ORDER BY userid) a
+		    WHERE ROWNUM &lt;= #{page}*#{pageSize})
+		WHERE rn BETWEEN (#{page}-1)*#{pageSize} + 1 AND #{page}*#{pageSize}
+  	</select>
+  	
+	<select id="selectAllUserCnt" resultType="int">
+	    SELECT COUNT(*)
+	    FROM users
+  	</select>
+  	
+	<select id="selectKeywordUserCnt" resultType="int" parameterType="pageVo">
+	    SELECT COUNT(*)
+		        FROM users
+                where userid like '%'||#{userid}||'%'
+                and usernm like '%'||#{usernm}||'%'
+                and alias like '%'||#{alias}||'%'
+		        ORDER BY userid
+  	</select>
+  	
+  	<!-- 사용자 정보 수정 -->
+  	<update id="modifyUser" parameterType="memberVo">
+		update users set usernm = #{usernm},
+		                pass = #{pass},
+		                alias = #{alias},
+		                addr1 = #{addr1},
+		                addr2 = #{addr2},
+		                zipcode = #{zipcode},
+		                filename = #{filename}, 
+		                realfilename = #{realfilename}
+		where userid = #{userid}
+  	</update>
+  	
+  	<insert id="registUser" parameterType="memberVo">
+  		Insert into users 
+   	 		values(#{userid},#{usernm},#{pass},sysdate,#{alias},#{addr1},#{addr2},#{zipcode}, #{filename}, #{realfilename})
+  	</insert>
+  	
+  	<delete id="deleteUser" parameterType="String">
+  		delete users where userid = #{userid}
+  	</delete>
+  	
+  	<select id="selectPagingSelectKeywordMember" resultType="memberVo" 
+									parameterType="pageVo">
+	    SELECT *
+	    FROM
+	    (SELECT ROWNUM rn, a.*
+	    FROM
+		        (SELECT *
+		        FROM users
+		        where userid like '%'||#{userid}||'%'
+                and usernm like '%'||#{usernm}||'%'
+                and alias like '%'||#{alias}||'%'
+		        ORDER BY userid) a
+		    WHERE ROWNUM &lt;= #{page}*#{pageSize})
+		WHERE rn BETWEEN (#{page}-1)*#{pageSize} + 1 AND #{page}*#{pageSize}
+  	</select>
+  	
+  	<select id="selectAllPagingKeywordMember" resultType="memberVo" 
+									parameterType="pageVo">
+	    SELECT *
+	    FROM
+	    (SELECT ROWNUM rn, a.*
+	    FROM
+		        (SELECT *
+		        FROM users
+		        where userid like '%'||#{userid}||'%'
+                or usernm like '%'||#{usernm}||'%'
+                or alias like '%'||#{alias}||'%'
+		        ORDER BY userid) a
+		    WHERE ROWNUM &lt;= #{page}*#{pageSize})
+		WHERE rn BETWEEN (#{page}-1)*#{pageSize} + 1 AND #{page}*#{pageSize}
+  	</select>
+  
+  
+</mapper>
